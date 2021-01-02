@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+	integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+	crossorigin="anonymous">
+<!--Fontawesome CDN-->
+<link rel="stylesheet"
+	href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+	integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+	crossorigin="anonymous">
+
+<link rel="icon" th:href="@{/img/favicon.ico}">
+<link th:href="@{/css/jquery.json-viewer.css}" rel="stylesheet">
+<title>Assurance</title>
+</head>
+<body>
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+		integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+		crossorigin="anonymous"></script>
+	<script src="/js/jquery.json-viewer.js"></script>
+	<div th:replace="asr/common/header :: header"></div>
+	<div class="container-fluid">
+
+		<div class="row">
+			<div class="col">
+				<div class="alert alert-success alert-dismissible fade show"
+					role="alert" th:if="${successMsg!=null}">
+					<span th:text="${successMsg}"></span>
+					<button type="button" class="close" data-dismiss="alert"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+
+				<div class="alert alert-danger alert-dismissible fade show"
+					role="alert" th:if="${errorMsg!=null}">
+					<span th:text="${errorMsg}"></span>
+					<button type="button" class="close" data-dismiss="alert"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div th:unless="${#lists.isEmpty(oauthConfigs)}"
+			class="row justify-content-center mt-5">
+			<div class="col">
+				<div class="accordion" id="viewSamlConfigsAccordianId">
+					<div class="card">
+						<h5 class="card-header">
+							<button class="btn btn-link btn-block text-left" type="button"
+								data-toggle="collapse" data-target="#viewSamlCollapsibleBodyId"
+								aria-expanded="true" aria-controls="viewSamlCollapsibleBodyId">Available
+								OAuth2 Configuration(s)</button>
+						</h5>
+						<div id="viewSamlCollapsibleBodyId" class="collapse show"
+							aria-labelledby="create saml"
+							data-parent="#viewSamlConfigsAccordianId">
+
+							<div class="card-body">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th scope="col">Config Id</th>
+											<th scope="col">Config Name</th>
+											<th scope="col">No. Of Clients</th>
+											<th scope="col">Active</th>
+											<th scope="col">Clients</th>
+											<th scope="col">Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="oc : ${oauthConfigs}">
+											<th scope="row" th:text="${oc.configId}" />
+											<td th:text="${oc.configName}" />
+											<td th:text="${#lists.size(oauthConfigs)}" />
+											<td th:text="${oc.active}" />
+											<td><a href="javascript:void(0)"
+												onclick="openJsonModal(event)"
+												th:data-content="${oc.metadata}"> View Clients </a></td>
+											<td><a href="javascript:void(0)"
+												onclick="confirmDeleteConfig(event)"
+												th:config-id="${oc.configId}">Delete</a></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<form id="deleteConfigFormId" th:action="@{/assurance/oauth/delete}"
+				method="post">
+				<input type="hidden" name="configIdToBeDeleted"
+					id="configIdToBeDeletedId" value="" />
+			</form>
+		</div>
+
+
+		<div class="row justify-content-center mt-5">
+			<div class="col">
+				<div class="accordion" id="createOauthAccordianId">
+					<div class="card">
+						<h5 class="card-header">
+							<button class="btn btn-link btn-block text-left" type="button"
+								data-toggle="collapse"
+								data-target="#createOauthCollapsibleBodyId" aria-expanded="true"
+								aria-controls="createOauthCollapsibleBodyId">Create
+								Oauth2 Configuration</button>
+						</h5>
+						<div id="createOauthCollapsibleBodyId" class="collapse show"
+							aria-labelledby="create oauth"
+							data-parent="#createOauthAccordianId">
+							<div class="card-body">
+								<div class="container">
+									<form th:action="@{/assurance/oauth}" id="oauthCreateFormId"
+										th:object="${createOauthForm}" enctype="multipart/form-data"
+										method="post">
+										<div class="row">
+											<div class="col">
+												<label for="regId_id">Registration Id</label> <input
+													type="text" th:field="*{regId}" id="regId_id" required
+													class="form-control" placeholder="Regsitration Id">
+											</div>
+											<div class="col">
+												<label for="clientId_id">Client ID</label> <input
+													type="text" id="clientId_id" th:field="*{clientId}"
+													required class="form-control" placeholder="Client Identity">
+											</div>
+											<div class="col">
+												<label for="clientSecret_id">Client Secret</label> <input
+													type="password" id="clientSecret_id"
+													th:field="*{clientSecret}" required class="form-control"
+													placeholder="Client Secret">
+											</div>
+										</div>
+										<fieldset>
+											<legend>SSO Server Configuration Endpoints</legend>
+											<div class="row">
+												<div class="col">
+													<label for="authUri_id">Authorization Uri</label> <input
+														type="text" id="authUri_id" th:field="*{authUri}" required
+														class="form-control" placeholder="Authorization Endpoint" />
+
+												</div>
+												<div class="col">
+													<label for="tokenUri_id">Token Uri</label> <input
+														type="text" id="tokenUri_id" th:field="*{tokenUri}"
+														required class="form-control" placeholder="Token Endpoint" />
+
+												</div>
+											</div>
+											<div class="row">
+												<div class="col">
+													<label for="userInfoUri_id">User Info Uri</label> <input
+														type="text" id="userInfoUri_id" th:field="*{userInfoUri}"
+														required class="form-control"
+														placeholder="User Info Endpoint" />
+
+												</div>
+												<div class="col">
+													<label for="jwksUri_id">Jwks Uri</label> <input type="text"
+														required id="jwksUri_id" th:field="*{jwksUri}"
+														class="form-control"
+														placeholder="Json Web Kit Set Endpoint" />
+
+												</div>
+											</div>
+										</fieldset>
+
+										<div class="row">
+											<div class="col">
+												<label for="saveCfgOpt_id">Add Oauth To</label> <select
+													th:field="*{saveCfg}" id="saveCfgOpt_id"
+													class="custom-select" onchange="loadAddConfig()">
+													<option th:each="sco : ${saveCfgOptions}" th:value="${sco}"
+														th:text="${sco==''? 'Choose ...' : sco}"
+														th:selected="${sco==saveCfg}"></option>
+												</select>
+											</div>
+											<div class="col" th:if="*{saveCfg == 'New'}">
+												<label for="configName_id">Name</label> <input type="text"
+													th:field="*{configName}" id="configName_id" required
+													class="form-control" placeholder="Config Name">
+											</div>
+											<div class="col" th:if="*{saveCfg == 'Existing'}">
+												<label for="addToConfigId_selectId">Select Existing
+													Configuration</label> <select id="addToConfigId_selectId" required
+													th:field="*{addtoConfigId}" class="custom-select">
+													<option th:each="ec : ${extCfgs}" th:value="${ec.id}"
+														th:text="${ec.id==''? 'Choose ...' : ec.name}"
+														th:selected="${ec.id==saveCfg}"></option>
+												</select>
+											</div>
+										</div>
+
+										<div class="row mt-3">
+											<div class="col">
+												<button id="sbmtBtnId" type="submit"
+													class="btn btn-primary btn-block">Create</button>
+											</div>
+
+										</div>
+										<input type="hidden" id="operation_hiddenId"
+											th:field="*{operation}" />
+									</form>
+
+								</div>
+							</div>
+						</div>
+						<!-- Collapsible create oauth body ends -->
+					</div>
+				</div>
+				<!-- Create oauth Accordian Ends-->
+			</div>
+		</div>
+		<!-- Create Oauth ROW Ends -->
+
+
+	</div>
+
+
+
+	<div id="metadataModalId" class="modal">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">View Client Registrations</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div id="idpMetadataJsonViewerId" class="modal-body">Loading
+					.........</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="confirmDelModalId">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Confirmation Needed</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>
+						Are you sure to delete configuration <span
+							id="configTobeDeletedId"></span> ?
+					</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger"
+						onclick="deleteConfig()">Delete</button>
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#header_oauth_liId").addClass('active');
+		});
+
+		loadAddConfig = function() {
+			$('#operation_hiddenId').val('select_onchange');
+			setTimeout(()=>{
+				$('#oauthCreateFormId').submit();
+			},100);
+		};
+		
+		openJsonModal = function(event) {
+			const data = event.target.getAttribute('data-content');
+			$("#idpMetadataJsonViewerId").empty();
+			$("#idpMetadataJsonViewerId").jsonViewer(JSON.parse(data),{
+				collapsed: true
+			})
+			setTimeout(()=>{
+				$('#metadataModalId').modal('show');
+			},100);
+		}
+		
+		confirmDeleteConfig = function(event) {
+			let configId = event.target.getAttribute('config-id');
+			$("#configTobeDeletedId").empty().text(configId);
+			$('#confirmDelModalId').modal('show');
+		}
+		
+		deleteConfig = function() {
+			$('#confirmDelModalId').modal('hide');
+			let configId = $("#configTobeDeletedId").text();
+			$('#configIdToBeDeletedId').val(configId);
+			setTimeout(()=>{
+				$('#deleteConfigFormId').submit();
+			},100);
+		}
+		
+	</script>
+
+
+
+</body>
+</html>

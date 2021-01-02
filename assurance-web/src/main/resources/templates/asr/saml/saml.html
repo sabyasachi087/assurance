@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+	integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+	crossorigin="anonymous">
+<!--Fontawesome CDN-->
+<link rel="stylesheet"
+	href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+	integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+	crossorigin="anonymous">
+
+<link rel="icon" th:href="@{/img/favicon.ico}">
+<link th:href="@{/css/simpleXML.css}" rel="stylesheet">
+<title>Assurance</title>
+</head>
+<body>
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+		integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+		crossorigin="anonymous"></script>
+	<script src="/js/simpleXML.js"></script>
+	<div th:replace="asr/common/header :: header"></div>
+	<div class="container-fluid">
+
+		<div class="row">
+			<div class="col">
+				<div class="alert alert-success alert-dismissible fade show"
+					role="alert" th:if="${successMsg!=null}">
+					<span th:text="${successMsg}"></span>
+					<button type="button" class="close" data-dismiss="alert"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+
+				<div class="alert alert-danger alert-dismissible fade show"
+					role="alert" th:if="${errorMsg!=null}">
+					<span th:text="${errorMsg}"></span>
+					<button type="button" class="close" data-dismiss="alert"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div th:unless="${#lists.isEmpty(samlConfigs)}"
+			class="row justify-content-center mt-5">
+			<div class="col">
+				<div class="accordion" id="viewSamlConfigsAccordianId">
+					<div class="card">
+						<h5 class="card-header">
+							<button class="btn btn-link btn-block text-left" type="button"
+								data-toggle="collapse" data-target="#viewSamlCollapsibleBodyId"
+								aria-expanded="true" aria-controls="viewSamlCollapsibleBodyId">Available
+								SAML2 Configuration(s)</button>
+						</h5>
+						<div id="viewSamlCollapsibleBodyId" class="collapse show"
+							aria-labelledby="create saml"
+							data-parent="#viewSamlConfigsAccordianId">
+
+							<div class="card-body">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th scope="col">Config Id</th>
+											<th scope="col">Config Name</th>
+											<th scope="col">Entity Id</th>
+											<th scope="col">Certificate Type</th>
+											<th scope="col">Signing Algorithm</th>
+											<th scope="col">Active</th>
+											<th scope="col">IDP Metadata</th>
+											<th scope="col">Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="sc : ${samlConfigs}">
+											<th scope="row" th:text="${sc.configId}" />
+											<td th:text="${sc.configName}" />
+											<td th:text="${sc.entityId}" />
+											<td th:text="${sc.certificateType}" />
+											<td th:text="${sc.signAlgo}" />
+											<td th:text="${sc.active}" />
+											<td><a href="javascript:void(0)"
+												onclick="openXmlModal(event)"
+												th:data-content="${sc.metadata}"> IDP Metadata XML </a></td>
+											<td><a href="javascript:void(0)"
+												onclick="confirmDeleteConfig(event)"
+												th:config-id="${sc.configId}">Delete</a></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<form id="deleteConfigFormId" th:action="@{/assurance/saml/delete}"
+				method="post">
+				<input type="hidden" name="configIdToBeDeleted"
+					id="configIdToBeDeletedId" value="" />
+			</form>
+		</div>
+
+		<div class="row justify-content-center mt-5">
+			<div class="col">
+				<div class="accordion" id="createSamlAccordianId">
+					<div class="card">
+						<h5 class="card-header">
+							<button class="btn btn-link btn-block text-left" type="button"
+								data-toggle="collapse"
+								data-target="#createSamlCollapsibleBodyId" aria-expanded="true"
+								aria-controls="createSamlCollapsibleBodyId">Create
+								SAML2 Configuration</button>
+						</h5>
+						<div id="createSamlCollapsibleBodyId" class="collapse show"
+							aria-labelledby="create saml"
+							data-parent="#createSamlAccordianId">
+							<div class="card-body">
+								<div class="container">
+									<form th:action="@{/assurance/saml}"
+										th:object="${createSamlForm}" enctype="multipart/form-data"
+										method="post">
+										<div class="row">
+											<div class="col">
+												<label for="configName_id">Name</label> <input type="text"
+													th:field="*{configName}" id="configName_id" required
+													class="form-control" placeholder="Config Name">
+											</div>
+											<div class="col">
+												<label for="entityId_id">Entity ID</label> <input
+													type="text" id="entityId_id" th:field="*{entityId}"
+													required class="form-control" placeholder="Entity Identity">
+											</div>
+											<div class="col">
+												<label for="signAlgo_id">Algorithm</label> <select
+													th:field="*{signAlgo}" id="signAlgo_id"
+													class="custom-select">
+													<option th:each="algo : ${algos}" th:value="${algo}"
+														th:text="${algo==''? 'Choose ...' : algo}"
+														th:selected="${algo==signAlgo}"></option>
+												</select>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col">
+												<label for="idpMetadat_id">IDP Metadata</label>
+												<textarea id="idpMetadat_id" th:field="*{idpMetadata}"
+													class="form-control" placeholder="IDP Metadata XML"></textarea>
+
+											</div>
+										</div>
+										<fieldset>
+											<legend>Certificate Information</legend>
+											<div class="row">
+												<div class="col">
+													<label for="certType_id">Certificate Type</label> <select
+														th:field="*{certificateType}" id="certType_id"
+														class="custom-select">
+														<option th:each="cf : ${certFormats}" th:value="${cf}"
+															th:text="${cf==''? 'Choose ...' : cf}"
+															th:selected="${cf==certificateType}"></option>
+													</select>
+												</div>
+												<div class="col">
+													<label for="crtAliasId">Cert Alias</label> <input
+														type="text" id="crtAliasId" th:field="*{certAlias}"
+														class="form-control" placeholder="Certificate Alias">
+												</div>
+												<div class="col">
+													<label for="certPwdId">Cert Password</label> <input
+														type="password" id="certPwdId" th:field="*{certPwd}"
+														class="form-control" required
+														placeholder="Certificate Password">
+												</div>
+											</div>
+											<div class="row mt-1">
+												<div class="col">
+													<div class="custom-file">
+														<label class="custom-file-label" for="customFile">Upload
+															Certificate</label> <input type="file" name="certificate"
+															class="custom-file-input" id="customFile">
+													</div>
+												</div>
+											</div>
+										</fieldset>
+
+										<div class="row mt-3">
+											<div class="col">
+												<button id="sbmtBtnId" type="submit"
+													class="btn btn-primary btn-block">Create</button>
+											</div>
+
+										</div>
+
+									</form>
+
+								</div>
+							</div>
+						</div>
+						<!-- Collapsible create saml body ends -->
+					</div>
+				</div>
+				<!-- Create SAML Accordian Ends-->
+			</div>
+		</div>
+		<!-- Create SAML ROW Ends -->
+
+
+	</div>
+
+
+
+	<div id="metadataModalId" class="modal">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">View IDP XML</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div id="idpMetadatXmlViewerId" class="modal-body">Loading
+					.........</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="confirmDelModalId">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Confirmation Needed</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>
+						Are you sure to delete configuration <span
+							id="configTobeDeletedId"></span> ?
+					</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger"
+						onclick="deleteConfig()">Delete</button>
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#header_saml_liId").addClass('active');
+		});
+
+		openXmlModal = function(event) {
+			let xml = event.target.getAttribute('data-content');
+			$("#idpMetadatXmlViewerId").empty().simpleXML({
+				xmlString : xml
+			});
+			setTimeout(()=>{
+				$('#metadataModalId').modal('show');
+			},100);
+			
+		}
+		
+		confirmDeleteConfig = function(event) {
+			let configId = event.target.getAttribute('config-id');
+			$("#configTobeDeletedId").empty().text(configId);
+			$('#confirmDelModalId').modal('show');
+		}
+		
+		deleteConfig = function() {
+			$('#confirmDelModalId').modal('hide');
+			let configId = $("#configTobeDeletedId").text();
+			$('#configIdToBeDeletedId').val(configId);
+			$('#deleteConfigFormId').submit();
+		}
+	</script>
+
+
+
+</body>
+</html>
