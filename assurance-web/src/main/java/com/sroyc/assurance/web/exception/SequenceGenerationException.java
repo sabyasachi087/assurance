@@ -1,4 +1,4 @@
-package com.sroyc.assurance.web;
+package com.sroyc.assurance.web.exception;
 
 import com.sroyc.assurance.core.exception.AssuranceRuntimeException;
 

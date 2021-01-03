@@ -12,7 +12,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sroyc.assurance.web.SequenceGenerationException;
+import com.sroyc.assurance.web.exception.SequenceGenerationException;
 
 public enum UniqueSequenceGenerator {
 
