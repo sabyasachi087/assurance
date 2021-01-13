@@ -8,7 +8,7 @@ import com.sroyc.assurance.web.config.DatabaseConnectionInfo;
 import com.sroyc.assurance.web.config.DatabaseType;
 
 @Component
-@Profile("sroyc.data.mongo")
+@Profile("sroyc.assurance.db.mongo.conn")
 public class MongoDBConnectionInfo implements DatabaseConnectionInfo {
 
 	/**

@@ -13,7 +13,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
 @Configuration
-@Profile("sroyc.data.mongo")
+@Profile("sroyc.assurance.db.mongo.conn")
 @EnableMongoRepositories(basePackages = "com.sroyc.assurance.web.mongo")
 public class AssuranceMongoConfiguration {
 
