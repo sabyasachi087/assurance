@@ -5,9 +5,10 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import com.sroyc.assurance.core.data.AssuranceUserDetails;
+import com.sroyc.assurance.core.sso.AssuranceUserDetailsService;
 
-public abstract class AssuranceOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+public abstract class AssuranceOAuth2UserService
+		implements OAuth2UserService<OAuth2UserRequest, OAuth2User>, AssuranceUserDetailsService {
 
 	private DefaultOAuth2UserService userService;
 
@@ -18,9 +19,7 @@ public abstract class AssuranceOAuth2UserService implements OAuth2UserService<OA
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) {
 		OAuth2User user = this.userService.loadUser(userRequest);
-		return loadUser(user);
+		return loadUser(user.getAttributes(), user);
 	}
-
-	protected abstract AssuranceUserDetails loadUser(OAuth2User user);
 
 }

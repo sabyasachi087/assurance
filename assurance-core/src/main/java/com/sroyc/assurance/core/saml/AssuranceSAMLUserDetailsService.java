@@ -8,20 +8,14 @@ import org.apache.logging.log4j.Logger;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.schema.impl.XSStringImpl;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
-import com.sroyc.assurance.core.data.AssuranceCoreConstants;
-import com.sroyc.assurance.core.data.AssuranceUserDetails;
+import com.sroyc.assurance.core.sso.AssuranceUserDetailsService;
 
-public class DefaultSAMLUserDetailsService implements SAMLUserDetailsService {
+public abstract class AssuranceSAMLUserDetailsService implements SAMLUserDetailsService, AssuranceUserDetailsService {
 
-	private static final Logger LOGGER = LogManager.getLogger(DefaultSAMLUserDetailsService.class);
-
-	public DefaultSAMLUserDetailsService() {
-		LOGGER.warn("Default saml user service is being initialized. Must create custom user service for security");
-	}
+	private static final Logger LOGGER = LogManager.getLogger(AssuranceSAMLUserDetailsService.class);
 
 	@Override
 	public Object loadUserBySAML(SAMLCredential credential) {
@@ -31,12 +25,12 @@ public class DefaultSAMLUserDetailsService implements SAMLUserDetailsService {
 				if (val instanceof XSStringImpl) {
 					XSStringImpl strVal = (XSStringImpl) val;
 					attributes.put(s.getName(), strVal.getValue());
-					LOGGER.debug("{} - {}", s.getName(), strVal.getValue());
+					if (LOGGER.isDebugEnabled())
+						LOGGER.debug("{} - {}", s.getName(), strVal.getValue());
 				}
 			}
 		}
-		return new AssuranceUserDetails(credential.getNameID().getValue(), AssuranceCoreConstants.PASSWORD,
-				AuthorityUtils.createAuthorityList(AssuranceCoreConstants.ROLE));
+		return this.loadUser(attributes, credential);
 	}
 
 }

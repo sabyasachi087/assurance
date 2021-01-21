@@ -23,6 +23,7 @@ import com.sroyc.assurance.core.exception.AssuranceConfigurationException;
 import com.sroyc.assurance.core.exception.AssuranceRuntimeException;
 import com.sroyc.assurance.core.exception.ResetFailureException;
 import com.sroyc.assurance.core.sso.AssuranceProviderManager;
+import com.sroyc.assurance.core.sso.DefaultAssuranceSAMLUserDetailsService;
 import com.sroyc.assurance.core.sso.SSOConfiguration;
 
 @Component("saml2SSOConfiguration")
@@ -64,9 +65,9 @@ public class Saml2SSOConfiguration extends SSOConfiguration {
 
 	protected void setUserService() {
 		try {
-			this.userService = this.context.getBean(SAMLUserDetailsService.class);
+			this.userService = this.context.getBean(AssuranceSAMLUserDetailsService.class);
 		} catch (NoSuchBeanDefinitionException nsdbe) {
-			this.userService = new DefaultSAMLUserDetailsService();
+			this.userService = new DefaultAssuranceSAMLUserDetailsService();
 		}
 	}
 
