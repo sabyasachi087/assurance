@@ -22,11 +22,10 @@ public class DefaultAssuranceOAuth2UserService extends AssuranceOAuth2UserServic
 
 	@Override
 	public AssuranceUserDetails loadUser(Map<String, Object> attributes, Object authenticationUserObject) {
-		return new AssuranceUserDetails(
-				attributes.get("username") != null ? attributes.get("username").toString()
-						: attributes.get("email").toString(),
-				AssuranceCoreConstants.PASSWORD, AuthorityUtils.createAuthorityList(AssuranceCoreConstants.ROLE),
-				attributes);
+		String username = attributes.get("username") != null ? attributes.get("username").toString()
+				: attributes.get("email").toString();
+		return new AssuranceUserDetails(username, AssuranceCoreConstants.PASSWORD,
+				AuthorityUtils.createAuthorityList(AssuranceCoreConstants.ROLE), attributes);
 	}
 
 }
