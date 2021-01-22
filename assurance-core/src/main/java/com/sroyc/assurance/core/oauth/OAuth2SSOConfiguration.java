@@ -2,8 +2,6 @@ package com.sroyc.assurance.core.oauth;
 
 import javax.servlet.Filter;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -21,13 +19,12 @@ import com.sroyc.assurance.core.data.SSOType;
 import com.sroyc.assurance.core.exception.ResetFailureException;
 import com.sroyc.assurance.core.sso.AssuranceFailureHandler;
 import com.sroyc.assurance.core.sso.AssuranceProviderManager;
+import com.sroyc.assurance.core.sso.AssuranceUserDetailsService;
+import com.sroyc.assurance.core.sso.DefaultAssuranceUserDetailsService;
 import com.sroyc.assurance.core.sso.SSOConfiguration;
-import com.sroyc.assurance.core.util.AssuranceCommonUtil;
 
 @Component("oauth2SSOConfiguration")
 public class OAuth2SSOConfiguration extends SSOConfiguration {
-
-	private static final Logger LOGGER = LogManager.getLogger(OAuth2SSOConfiguration.class);
 
 	private Oauth2SSORuntimeConfigurer configurer;
 	private AssuranceFailureHandler failureHandler;
@@ -74,13 +71,12 @@ public class OAuth2SSOConfiguration extends SSOConfiguration {
 		return this.configurer.requestMatcher();
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void setUserService() {
-		if ((this.userService = AssuranceCommonUtil.getBeanByClass(OAuth2UserService.class, this.context)) == null) {
-			LOGGER.warn("Unable to find beans of type [{}] or [{}]. Falling back to default implementation",
-					OAuth2UserService.class.getCanonicalName(), AssuranceOAuth2UserService.class.getCanonicalName());
-			this.userService = new DefaultAssuranceOAuth2UserService();
+		AssuranceUserDetailsService uds = this.getUserDetailsService();
+		if (uds == null) {
+			uds = new DefaultAssuranceUserDetailsService();
 		}
+		this.userService = new AssuranceOAuth2UserService(uds);
 	}
 
 }

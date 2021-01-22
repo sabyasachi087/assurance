@@ -2,7 +2,6 @@ package com.sroyc.assurance.core.saml;
 
 import javax.servlet.Filter;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
@@ -23,7 +22,8 @@ import com.sroyc.assurance.core.exception.AssuranceConfigurationException;
 import com.sroyc.assurance.core.exception.AssuranceRuntimeException;
 import com.sroyc.assurance.core.exception.ResetFailureException;
 import com.sroyc.assurance.core.sso.AssuranceProviderManager;
-import com.sroyc.assurance.core.sso.DefaultAssuranceSAMLUserDetailsService;
+import com.sroyc.assurance.core.sso.AssuranceUserDetailsService;
+import com.sroyc.assurance.core.sso.DefaultAssuranceUserDetailsService;
 import com.sroyc.assurance.core.sso.SSOConfiguration;
 
 @Component("saml2SSOConfiguration")
@@ -64,11 +64,11 @@ public class Saml2SSOConfiguration extends SSOConfiguration {
 	}
 
 	protected void setUserService() {
-		try {
-			this.userService = this.context.getBean(AssuranceSAMLUserDetailsService.class);
-		} catch (NoSuchBeanDefinitionException nsdbe) {
-			this.userService = new DefaultAssuranceSAMLUserDetailsService();
+		AssuranceUserDetailsService uds = this.getUserDetailsService();
+		if (uds == null) {
+			uds = new DefaultAssuranceUserDetailsService();
 		}
+		this.userService = new AssuranceSAMLUserDetailsService(uds);
 	}
 
 	@Override

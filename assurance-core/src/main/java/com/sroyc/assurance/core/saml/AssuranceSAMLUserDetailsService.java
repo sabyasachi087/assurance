@@ -13,9 +13,15 @@ import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
 import com.sroyc.assurance.core.sso.AssuranceUserDetailsService;
 
-public abstract class AssuranceSAMLUserDetailsService implements SAMLUserDetailsService, AssuranceUserDetailsService {
+public class AssuranceSAMLUserDetailsService implements SAMLUserDetailsService {
 
 	private static final Logger LOGGER = LogManager.getLogger(AssuranceSAMLUserDetailsService.class);
+
+	private AssuranceUserDetailsService uds;
+
+	public AssuranceSAMLUserDetailsService(AssuranceUserDetailsService uds) {
+		this.uds = uds;
+	}
 
 	@Override
 	public Object loadUserBySAML(SAMLCredential credential) {
@@ -30,7 +36,7 @@ public abstract class AssuranceSAMLUserDetailsService implements SAMLUserDetails
 				}
 			}
 		}
-		return this.loadUser(attributes, credential);
+		return this.uds.loadUser(attributes, credential);
 	}
 
 }

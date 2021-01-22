@@ -8,13 +8,14 @@ import org.springframework.security.core.authority.AuthorityUtils;
 
 import com.sroyc.assurance.core.data.AssuranceCoreConstants;
 import com.sroyc.assurance.core.data.AssuranceUserDetails;
-import com.sroyc.assurance.core.saml.AssuranceSAMLUserDetailsService;
 
-public class DefaultAssuranceSAMLUserDetailsService extends AssuranceSAMLUserDetailsService {
-	private static final Logger LOGGER = LogManager.getLogger(DefaultAssuranceSAMLUserDetailsService.class);
+public class DefaultAssuranceUserDetailsService implements AssuranceUserDetailsService {
+	private static final Logger LOGGER = LogManager.getLogger(DefaultAssuranceUserDetailsService.class);
 
-	public DefaultAssuranceSAMLUserDetailsService() {
-		LOGGER.warn("Default saml user service is being initialized. Must create custom user service for security");
+	public DefaultAssuranceUserDetailsService() {
+		LOGGER.warn(
+				"Default assurance user service is being initialized. Must create custom user service of type [{}] for security",
+				AssuranceUserDetailsService.class.getCanonicalName());
 	}
 
 	@Override

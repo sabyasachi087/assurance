@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.Filter;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -114,9 +115,20 @@ public abstract class SSOConfiguration implements Resetable {
 		return null;
 	}
 
-	/** Prototype bean */
 	protected AssuranceSuccessHandler getSuccessHandler() {
 		return this.context.getBean(AssuranceSuccessHandler.class);
+	}
+
+	/**
+	 * Returns instance of {@linkplain AssuranceUserDetailsService} if found, null
+	 * otherwise
+	 */
+	protected AssuranceUserDetailsService getUserDetailsService() {
+		try {
+			return this.context.getBean(AssuranceUserDetailsService.class);
+		} catch (NoSuchBeanDefinitionException nsdbe) {
+		}
+		return null;
 	}
 
 }
