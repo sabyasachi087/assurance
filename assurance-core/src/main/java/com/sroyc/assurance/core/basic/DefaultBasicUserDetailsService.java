@@ -1,16 +1,19 @@
 package com.sroyc.assurance.core.basic;
 
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.sroyc.assurance.core.data.AssuranceCoreConstants;
 import com.sroyc.assurance.core.data.AssuranceUserDetails;
+import com.sroyc.assurance.core.sso.AssuranceUserDetailsService;
 
-public class DefaultBasicUserDetailsService implements BasicUserDetailsService {
+public class DefaultBasicUserDetailsService implements AssuranceUserDetailsService {
 
 	private static final Logger LOGGER = LogManager.getLogger(DefaultBasicUserDetailsService.class);
 
@@ -26,12 +29,16 @@ public class DefaultBasicUserDetailsService implements BasicUserDetailsService {
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String username) {
-		if (this.user.getUsername().equals(username)) {
-			return this.user;
-		} else {
-			throw new UsernameNotFoundException("User [" + username + "] could not be found");
+	public AssuranceUserDetails loadUser(Map<String, Object> attributes, Object authenticationUserObject) {
+		if (authenticationUserObject instanceof UsernamePasswordAuthenticationToken) {
+			UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authenticationUserObject;
+			String username = (String) token.getPrincipal();
+			String password = (String) token.getCredentials();
+			if (this.user.getUsername().equals(username) && this.user.getPassword().equals(password)) {
+				return this.user;
+			}
 		}
+		throw new UsernameNotFoundException("User could not be resolved");
 	}
 
 }
