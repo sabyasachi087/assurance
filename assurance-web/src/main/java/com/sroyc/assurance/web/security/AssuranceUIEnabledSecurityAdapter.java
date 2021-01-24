@@ -19,7 +19,7 @@ public abstract class AssuranceUIEnabledSecurityAdapter extends AssuranceWebSecu
 	protected void configure(
 			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry) {
 		secure(registry.antMatchers("/css/**").permitAll().antMatchers("/img/**").permitAll().antMatchers("/js/**")
-				.permitAll().anyRequest().authenticated());
+				.permitAll());
 	}
 
 	protected abstract void secure(
